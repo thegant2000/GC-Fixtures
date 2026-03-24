@@ -39,7 +39,6 @@ def normalise_time(value: str) -> str:
     hour = int(m.group(1))
     minute = int(m.group(2))
 
-    # Fixture sheet uses evening throw-in like 5.45
     if 1 <= hour <= 11:
         hour += 12
 
@@ -74,13 +73,9 @@ def strip_referee(value: str) -> tuple[str, str]:
     value = normalise_spaces(value)
 
     patterns = [
-        # Initial + surname / McSurname / O'Surname etc.
         r"^(.*?)\s+([A-Z]\.\s*[A-Z][A-Za-z'/-]+)$",
-        # Handles parsed variants like "V . Cox" or "P . McCaughey"
         r"^(.*?)\s+([A-Z]\s*\.\s*[A-Z][A-Za-z'/-]+)$",
-        # Two-word referee names like "Sean Carroll"
         r"^(.*?)\s+([A-Z][a-z]+\s+[A-Z][A-Za-z'/-]+)$",
-        # Three-word referee/location endings like "Sean Carroll Bunbrosna"
         r"^(.*?)\s+([A-Z][a-z]+\s+[A-Z][A-Za-z'/-]+\s+[A-Z][A-Za-z'/-]+)$",
     ]
 
@@ -120,7 +115,6 @@ def fixtures_to_rows(text: str, team_name: str = "Garrycastle", year: Optional[i
     fixture_re = re.compile(r"^(.*?)\s+v\s+(.*?)$", re.IGNORECASE)
 
     for line in lines:
-        # Global throw-in line near top of PDF
         ti_match = throw_in_re.search(line)
         if ti_match:
             current_throw_in = normalise_time(ti_match.group(1))
@@ -144,29 +138,30 @@ def fixtures_to_rows(text: str, team_name: str = "Garrycastle", year: Optional[i
             continue
 
         fixture_match = fixture_re.match(line)
-if fixture_match and current_age_group and current_division:
-    home_team = normalise_spaces(fixture_match.group(1))
-    away_with_ref = normalise_spaces(fixture_match.group(2))
-    away_team, referee = strip_referee(away_with_ref)
+        if fixture_match and current_age_group and current_division:
+            home_team = normalise_spaces(fixture_match.group(1))
+            away_with_ref = normalise_spaces(fixture_match.group(2))
+            away_team, referee = strip_referee(away_with_ref)
 
-    if team_name.lower() not in home_team.lower() and team_name.lower() not in away_team.lower():
-        continue
+            if team_name.lower() not in home_team.lower() and team_name.lower() not in away_team.lower():
+                continue
 
-    is_home = team_name.lower() in home_team.lower()
-    opponent = away_team if is_home else home_team
-    competition = f"{current_age_group}, {current_division}"
+            is_home = team_name.lower() in home_team.lower()
+            opponent = away_team if is_home else home_team
+            competition = f"{current_age_group}, {current_division}"
 
-    rows.append(
-        {
-            "date": current_date_display,
-            "day": current_weekday,
-            "start time": current_throw_in,
-            "competition": competition,
-            "age_group": current_age_group,
-            "home_team": home_team,
-            "away_team": away_team,
-            "referee": referee,
-        }
-    )
+            rows.append(
+                {
+
+                    "date": current_date_display,
+                    "weekday": current_weekday,
+                    "start_time": current_throw_in,
+                    "competition": competition,
+                    "age_group": current_age_group,
+                    "home_team": home_team,
+                    "away_team": away_team,
+                    "referee": referee,
+                }
+            )
 
     return rows
