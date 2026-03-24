@@ -1,15 +1,9 @@
 from __future__ import annotations
 
-import csv
-import json
 import re
-from dataclasses import asdict, dataclass
 from datetime import datetime
-from pathlib import Path
-from typing import List, Optional
-
+from typing import List, Dict, Optional
 from pypdf import PdfReader
-
 
 
 def extract_text(pdf_path: str) -> str:
@@ -33,12 +27,9 @@ def infer_year(text: str, default_year: Optional[int] = None) -> int:
 
 def normalise_time(value: str) -> str:
     value = value.strip().lower().replace(" ", "")
-    value = value.replace("throwin", "").replace("throw-in", "")
-
     m = re.match(r"^(\d{1,2})[:.](\d{2})$", value)
     if not m:
         return value
-
     hour = int(m.group(1))
     minute = int(m.group(2))
     return f"{hour:02d}:{minute:02d}"
@@ -60,7 +51,8 @@ def fixtures_to_rows(text: str, team_name: str = "Garrycastle", year: Optional[i
     current_competition = None
 
     date_pattern = re.compile(
-        r"^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s+(\d{1,2})\s+([A-Za-z]+)"
+        r"^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s+(\d{1,2})\s+([A-Za-z]+)",
+        re.IGNORECASE,
     )
 
     fixture_pattern = re.compile(r"^(.*?)\s+v\s+(.*?)$", re.IGNORECASE)
@@ -88,7 +80,6 @@ def fixtures_to_rows(text: str, team_name: str = "Garrycastle", year: Optional[i
             day = int(date_match.group(2))
             month_name = date_match.group(3).lower()
             month = month_map.get(month_name)
-
             if month:
                 current_date = f"{detected_year:04d}-{month:02d}-{day:02d}"
             continue
@@ -124,7 +115,6 @@ def fixtures_to_rows(text: str, team_name: str = "Garrycastle", year: Optional[i
                     "team": team_name,
                     "opponent": opponent,
                     "is_home": is_home,
-                    "source_pdf": pdf_path,
                     "original_line": line,
                 }
             )
