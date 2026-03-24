@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import tempfile
-from datetime import date, timedelta
-
 import pandas as pd
 import streamlit as st
 
@@ -21,31 +19,18 @@ if uploaded_file is not None:
         tmp.write(uploaded_file.getvalue())
         pdf_path = tmp.name
 
-    # Always infer year automatically
     text = extract_text(pdf_path)
     year = infer_year(text)
-
     fixtures = fixtures_to_rows(text, team_name=team_name, year=year)
 
     if not fixtures:
         st.warning(f"No fixtures found for {team_name}.")
     else:
         df = pd.DataFrame(fixtures)
+        st.dataframe(df, use_container_width=True)
 
-        if "date_iso" in df.columns:
-            df["date_iso"] = pd.to_datetime(df["date_iso"], errors="coerce")
-
-        display_df = df.copy()
-
-        if "date_iso" in display_df.columns:
-            display_df["date_iso"] = display_df["date_iso"].dt.strftime("%Y-%m-%d")
-
-        st.subheader("Fixtures")
-        st.dataframe(display_df, use_container_width=True)
-
-        # Downloads
-        csv_data = display_df.to_csv(index=False).encode("utf-8")
-        json_data = display_df.to_json(orient="records", indent=2)
+        csv_data = df.to_csv(index=False).encode("utf-8")
+        json_data = df.to_json(orient="records", indent=2)
 
         col1, col2 = st.columns(2)
 
