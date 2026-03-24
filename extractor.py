@@ -35,8 +35,9 @@ def normalise_time(value: str) -> str:
     return f"{hour:02d}:{minute:02d}"
 
 
-def parse_pdf(pdf_path: str) -> str:
-    return extract_text(pdf_path)
+def parse_pdf(pdf_path: str, team_name: str = "Garrycastle", year: Optional[int] = None) -> List[Dict]:
+    text = extract_text(pdf_path)
+    return fixtures_to_rows(text, team_name=team_name, year=year)
 
 
 def fixtures_to_rows(text: str, team_name: str = "Garrycastle", year: Optional[int] = None) -> List[Dict]:
