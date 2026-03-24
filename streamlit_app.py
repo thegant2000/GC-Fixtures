@@ -79,7 +79,7 @@ if uploaded_file is not None:
 
     try:
         text = extract_text(pdf_path)
-        year = infer_year(text, fallback=int(year_value)) if use_inferred_year else int(year_value)
+        year = infer_year(text, int(year_value)) if use_inferred_year else int(year_value)
         fixtures = parse_pdf(pdf_path=pdf_path, team_name=team_name, year=year)
         rows = fixtures_to_rows(fixtures)
         df = to_dataframe(rows)
