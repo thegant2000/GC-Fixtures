@@ -49,7 +49,6 @@ if uploaded_file is not None:
             ]
 
         display_df = df.copy()
-
         if "date_iso" in display_df.columns:
             display_df["date_iso"] = display_df["date_iso"].dt.strftime("%Y-%m-%d")
 
